@@ -2,12 +2,15 @@ import razorpay
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+
 from .models import *
 
 # Create your views here.
 def register(request):
     return render(request,"register.html")
 
+@login_required
 def fetchformdata(request):
     #form to variable
     name=request.POST.get("name")
@@ -33,6 +36,7 @@ def fetchformdata(request):
     insertquery.save()
     messages.success(request,"Registered Successfully!")
     return render(request,"login.html")
+
 
 def login(request):
     return render(request,"login.html")
@@ -63,6 +67,7 @@ def logindata(request):
         messages.error(request, "Invalid Credentials!!")
         return render(request, "login.html")
 
+@login_required
 def logout(request):
     try:
         del request.session["log_id"]
@@ -75,6 +80,7 @@ def logout(request):
         pass
     return redirect("/login")
 
+@login_required
 def showproducts(request):
     fetchdata = Product.objects.all()
     fetchcatdata = Category.objects.all()
@@ -101,7 +107,7 @@ def showproducts(request):
     }
     return render(request, "showproducts.html", context)
 
-
+@login_required
 def singleproducts(request,id):
     fetchdata = Product.objects.get(id=id)
     fetchproduct=productimage.objects.filter(productid=id)
@@ -111,6 +117,7 @@ def singleproducts(request,id):
     }
     return render(request,"singleproducts.html",context)
 
+@login_required
 def addproduct(request):
     if request.session.get("log_role") != 'seller':
         messages.error(request, "You do not have permission to add products.")
@@ -127,6 +134,7 @@ def addproduct(request):
 
     return render(request,"addproduct.html",context)
 
+@login_required
 def insertproduct(request):
     name = request.POST.get('name')
     category = request.POST.get('category')
@@ -143,6 +151,7 @@ def insertproduct(request):
 
     return redirect('/')
 
+@login_required
 def manageproduct(request):
     sellerid_loggedin=request.session["log_id"]
     fetchdata=Product.objects.filter(seller=sellerid_loggedin)
